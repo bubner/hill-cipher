@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.function.Function;
 
 /**
@@ -137,18 +138,28 @@ public class Matrix {
     }
 
     /**
-     * Invert the matrix.
+     * Invert this matrix.
      *
      * @return the inverted matrix
      */
     public Matrix invert() {
-        if (rows != cols) {
-            throw new IllegalArgumentException("Matrix must be square");
-        }
         double det = this.determinant();
         if (det == 0) {
             // Division by zero
             throw new IllegalArgumentException("Matrix must be invertible");
+        }
+        // Adjugate matrix with values divided by the determinant is the inverse
+        return this.adjugate().map(v -> v / det);
+    }
+
+    /**
+     * Get the adjugate matrix from this matrix.
+     *
+     * @return the adjugate matrix
+     */
+    public Matrix adjugate() {
+        if (rows != cols) {
+            throw new IllegalArgumentException("Matrix must be square");
         }
         double[][] cofactorMatrix = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -157,9 +168,8 @@ public class Matrix {
                 cofactorMatrix[i][j] = Math.pow(-1, i + j) * this.minor(i, j).determinant();
             }
         }
-        // Transposing the cofactor matrix gives the adjugate matrix which can then be
-        // divided by the determinant to complete the inversion process
-        return new Matrix(cofactorMatrix).transpose().map(x -> x / det);
+        // Transposing the cofactor matrix gives the adjugate matrix
+        return new Matrix(cofactorMatrix).transpose();
     }
 
     /**
@@ -213,11 +223,26 @@ public class Matrix {
      * Print the matrix.
      */
     public void print() {
+        System.out.println(this);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder toPrint = new StringBuilder();
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                System.out.print(data[i][j] + " ");
+                toPrint.append(data[i][j]).append(" ");
             }
-            System.out.println();
+            toPrint.append("\n");
         }
+        return toPrint.toString();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Matrix) {
+            return Arrays.deepEquals(data, (((Matrix) other).data));
+        }
+        return false;
     }
 }
