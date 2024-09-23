@@ -92,11 +92,14 @@ public class Matrix {
             throw new IllegalArgumentException("The number of columns in the first matrix must be equal to the number of rows in the second matrix");
         }
 
+        // New matrix has dimensions m1.r, m2.c
         double[][] result = new double[this.rows][other.cols];
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < other.cols; j++) {
+                // Summation
                 double sum = 0;
                 for (int k = 0; k < this.cols; k++) {
+                    // Dot product of across row on m1, down row on m2
                     sum += this.get(i, k) * other.get(k, j);
                 }
                 result[i][j] = sum;
@@ -123,8 +126,11 @@ public class Matrix {
             // det 2x2 = ad-bc
             return data[0][0] * data[1][1] - data[0][1] * data[1][0];
         }
+        // Summation
         double det = 0;
         for (int i = 0; i < cols; i++) {
+            // Laplace expansion where the first row is used, any row can be used as it is a constant factor
+            // Recursive call to the minor determinant which will eventually reach the 2x2 ad-bc case
             det += Math.pow(-1, i) * data[0][i] * this.minor(0, i).determinant();
         }
         return det;
@@ -141,15 +147,19 @@ public class Matrix {
         }
         double det = this.determinant();
         if (det == 0) {
+            // Division by zero
             throw new IllegalArgumentException("Matrix must be invertible");
         }
-        double[][] result = new double[rows][cols];
+        double[][] cofactorMatrix = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                result[i][j] = Math.pow(-1, i + j) * this.minor(i, j).determinant();
+                // The cofactor matrix is the matrix of minors with alternating signs
+                cofactorMatrix[i][j] = Math.pow(-1, i + j) * this.minor(i, j).determinant();
             }
         }
-        return new Matrix(result).transpose().map(x -> x / det);
+        // Transposing the cofactor matrix gives the adjugate matrix which can then be
+        // divided by the determinant to complete the inversion process
+        return new Matrix(cofactorMatrix).transpose().map(x -> x / det);
     }
 
     /**
@@ -161,6 +171,7 @@ public class Matrix {
         double[][] result = new double[cols][rows];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
+                // Swap the row and column
                 result[j][i] = data[i][j];
             }
         }
